@@ -4,11 +4,11 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
-var _ = API("chatter", func() {
+var _ = API("tmess", func() {
 	Title("Chatter service describing the streaming features of goa v2.")
 })
 
-var _ = Service("chatter", func() {
+var _ = Service("tmess", func() {
 	Description("The chatter service implements a simple client and server chat.")
 
 	Method("login", func() {

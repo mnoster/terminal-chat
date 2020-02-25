@@ -1,0 +1,369 @@
+swagger: "2.0"
+info:
+  title: Chatter service describing the streaming features of goa v2.
+  version: ""
+host: localhost:80
+consumes:
+- application/json
+- application/xml
+- application/gob
+produces:
+- application/json
+- application/xml
+- application/gob
+paths:
+  /echoer:
+    get:
+      tags:
+      - tmess
+      summary: echoer tmess
+      description: |-
+        Echoes the message sent by the client.
+
+        **Required security scopes for jwt**:
+          * `stream:write`
+      operationId: tmess#echoer
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols response.
+          schema:
+            type: string
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/TmessEchoerUnauthorizedResponseBody'
+        "403":
+          description: Forbidden response.
+          schema:
+            $ref: '#/definitions/TmessEchoerInvalidScopesResponseBody'
+      schemes:
+      - ws
+      security:
+      - jwt_header_Authorization: []
+  /history:
+    get:
+      tags:
+      - tmess
+      summary: history tmess
+      description: |-
+        Returns the chat messages sent to the server.
+
+        **Required security scopes for jwt**:
+          * `stream:read`
+      operationId: tmess#history
+      parameters:
+      - name: view
+        in: query
+        description: View to use to render the result
+        required: false
+        type: string
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols response.
+          schema:
+            $ref: '#/definitions/TmessHistoryResponseBody'
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/TmessHistoryUnauthorizedResponseBody'
+        "403":
+          description: Forbidden response.
+          schema:
+            $ref: '#/definitions/TmessHistoryInvalidScopesResponseBody'
+      schemes:
+      - ws
+      security:
+      - jwt_header_Authorization: []
+  /listener:
+    get:
+      tags:
+      - tmess
+      summary: listener tmess
+      description: |-
+        Listens to the messages sent by the client.
+
+        **Required security scopes for jwt**:
+          * `stream:write`
+      operationId: tmess#listener
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols response.
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/TmessListenerUnauthorizedResponseBody'
+        "403":
+          description: Forbidden response.
+          schema:
+            $ref: '#/definitions/TmessListenerInvalidScopesResponseBody'
+      schemes:
+      - ws
+      security:
+      - jwt_header_Authorization: []
+  /login:
+    post:
+      tags:
+      - tmess
+      summary: login tmess
+      description: Creates a valid JWT token for auth to chat.
+      operationId: tmess#login
+      parameters:
+      - name: Authorization
+        in: header
+        description: Basic Auth security using Basic scheme (https://tools.ietf.org/html/rfc7617)
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            type: string
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/TmessLoginUnauthorizedResponseBody'
+      schemes:
+      - http
+      security:
+      - basic_header_Authorization: []
+  /subscribe:
+    get:
+      tags:
+      - tmess
+      summary: subscribe tmess
+      description: |-
+        Subscribe to events sent when new chat messages are added.
+
+        **Required security scopes for jwt**:
+          * `stream:write`
+      operationId: tmess#subscribe
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols response.
+          schema:
+            $ref: '#/definitions/TmessSubscribeResponseBody'
+            required:
+            - message
+            - action
+            - added_at
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/TmessSubscribeUnauthorizedResponseBody'
+        "403":
+          description: Forbidden response.
+          schema:
+            $ref: '#/definitions/TmessSubscribeInvalidScopesResponseBody'
+      schemes:
+      - ws
+      security:
+      - jwt_header_Authorization: []
+  /summary:
+    get:
+      tags:
+      - tmess
+      summary: summary tmess
+      description: |-
+        Summarizes the chat messages sent by the client.
+
+        **Required security scopes for jwt**:
+          * `stream:write`
+      operationId: tmess#summary
+      parameters:
+      - name: Authorization
+        in: header
+        description: JWT used for authentication
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols response.
+          schema:
+            $ref: '#/definitions/TmessChatSummaryResponseCollection'
+        "401":
+          description: Unauthorized response.
+          schema:
+            $ref: '#/definitions/TmessSummaryUnauthorizedResponseBody'
+        "403":
+          description: Forbidden response.
+          schema:
+            $ref: '#/definitions/TmessSummaryInvalidScopesResponseBody'
+      schemes:
+      - ws
+      security:
+      - jwt_header_Authorization: []
+definitions:
+  ChatSummaryResponse:
+    title: 'Mediatype identifier: application/vnd.goa.summary; view=default'
+    type: object
+    properties:
+      length:
+        type: integer
+        description: Length of the message sent
+        example: 3532120388939941991
+        format: int64
+      message:
+        type: string
+        description: Message sent to the server
+        example: Et unde aut.
+      sent_at:
+        type: string
+        description: Time at which the message was sent
+        example: "1974-02-26T07:01:39Z"
+        format: date-time
+    description: ChatSummaryResponse result type (default view)
+    example:
+      length: 2795116748742094260
+      message: Reprehenderit eos quo aut nihil.
+      sent_at: "1992-01-24T20:25:56Z"
+    required:
+    - message
+    - sent_at
+  TmessChatSummaryResponseCollection:
+    title: 'Mediatype identifier: application/vnd.goa.summary; type=collection; view=default'
+    type: array
+    items:
+      $ref: '#/definitions/ChatSummaryResponse'
+    description: SummaryResponseBody is the result type for an array of ChatSummaryResponse
+      (default view)
+    example:
+    - length: 8421183412988099224
+      message: Ex quia alias ipsum velit.
+      sent_at: "1982-10-22T02:13:15Z"
+    - length: 8421183412988099224
+      message: Ex quia alias ipsum velit.
+      sent_at: "1982-10-22T02:13:15Z"
+  TmessEchoerInvalidScopesResponseBody:
+    title: TmessEchoerInvalidScopesResponseBody
+    type: string
+    example: Veritatis et maiores sit.
+  TmessEchoerUnauthorizedResponseBody:
+    title: TmessEchoerUnauthorizedResponseBody
+    type: string
+    example: Accusamus itaque ut.
+  TmessHistoryInvalidScopesResponseBody:
+    title: TmessHistoryInvalidScopesResponseBody
+    type: string
+    example: Ut est nulla.
+  TmessHistoryResponseBody:
+    title: 'Mediatype identifier: application/vnd.goa.summary; view=default'
+    type: object
+    properties:
+      length:
+        type: integer
+        description: Length of the message sent
+        example: 7911452723405849735
+        format: int64
+      message:
+        type: string
+        description: Message sent to the server
+        example: Atque nihil iure unde nihil eaque at.
+      sent_at:
+        type: string
+        description: Time at which the message was sent
+        example: "1971-04-02T23:32:42Z"
+        format: date-time
+    description: HistoryResponseBody result type (default view)
+    example:
+      length: 6425434214080323744
+      message: Culpa et dolores.
+      sent_at: "1985-07-18T09:15:49Z"
+    required:
+    - message
+    - sent_at
+  TmessHistoryUnauthorizedResponseBody:
+    title: TmessHistoryUnauthorizedResponseBody
+    type: string
+    example: Quae qui beatae explicabo.
+  TmessListenerInvalidScopesResponseBody:
+    title: TmessListenerInvalidScopesResponseBody
+    type: string
+    example: Accusamus iste sequi animi qui quam et.
+  TmessListenerUnauthorizedResponseBody:
+    title: TmessListenerUnauthorizedResponseBody
+    type: string
+    example: Facilis nam libero ut non dicta est.
+  TmessLoginUnauthorizedResponseBody:
+    title: TmessLoginUnauthorizedResponseBody
+    type: string
+    description: Credentials are invalid
+    example: Sequi vero veritatis sapiente et rerum et.
+  TmessSubscribeInvalidScopesResponseBody:
+    title: TmessSubscribeInvalidScopesResponseBody
+    type: string
+    example: Fuga adipisci amet quis ad non facere.
+  TmessSubscribeResponseBody:
+    title: TmessSubscribeResponseBody
+    type: object
+    properties:
+      action:
+        type: string
+        example: added
+        enum:
+        - added
+      added_at:
+        type: string
+        description: Time at which the message was added
+        example: "1973-05-25T07:28:39Z"
+        format: date-time
+      message:
+        type: string
+        description: Message sent to the server
+        example: Atque quam.
+    example:
+      action: added
+      added_at: "1987-04-11T00:32:50Z"
+      message: Eius itaque.
+    required:
+    - message
+    - action
+    - added_at
+  TmessSubscribeUnauthorizedResponseBody:
+    title: TmessSubscribeUnauthorizedResponseBody
+    type: string
+    example: Hic et tenetur culpa et ut saepe.
+  TmessSummaryInvalidScopesResponseBody:
+    title: TmessSummaryInvalidScopesResponseBody
+    type: string
+    example: Ut qui.
+  TmessSummaryUnauthorizedResponseBody:
+    title: TmessSummaryUnauthorizedResponseBody
+    type: string
+    example: Neque aliquid earum.
+securityDefinitions:
+  basic_header_Authorization:
+    type: basic
+    description: Secures the login endpoint.
+  jwt_header_Authorization:
+    type: apiKey
+    description: |-
+      Secures endpoint by requiring a valid JWT token. Supports scopes "stream:read" and "stream:write".
+
+      **Security Scopes**:
+        * `stream:read`: Read-only access
+        * `stream:write`: Read and write access
+    name: Authorization
+    in: header
