@@ -12,5 +12,20 @@ If the design of the application is updated (`design.go`), you must rerun code g
 This will recreate the `/gen` dir with the appropriate updates. 
 ```
 goa gen tmess/design
+```
 
+Goa can also generate example implementations for both the service and client
+```
+goa example calcsvc/design
+
+calc.go
+cmd/calc-cli/http.go
+cmd/calc-cli/main.go
+cmd/calc/http.go
+cmd/calc/main.go
+```
+#### Run and compile
+```
+cd cmd/tmess-ci
+go build
 ```
