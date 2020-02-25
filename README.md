@@ -1,5 +1,6 @@
 # TMESS 
 ## Terminal Messenger
+(In development)
 
 Simple client and server to integrate messaging in a terminal environment
 
